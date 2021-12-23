@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { Button, Form } from "react-bootstrap";
+import { Alert, Button, Container, Form } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
 import { API } from "../../hooks/Api";
 
 const Register = () => {
@@ -9,63 +10,69 @@ const Register = () => {
   const [validated, setValidated] = useState(false);
   const [msg, setMsg] = useState("");
 
+  const navigate = useNavigate();
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const form = e.currentTarget;
     try {
       const users = { email, password, name };
       const config = { headers: { "Content-Type": "application/json" } };
       const body = JSON.stringify(users);
       const response = await API.post("/register", body, config);
-      if (response.status === "success" && form.checkValidty()) {
+      if (response.status === "Success") {
         setMsg(response.data.message);
         setValidated(true);
       } else {
         setMsg(response.data.message);
       }
-      console.log(response.data.message);
+      setTimeout(() => {
+        navigate("/login");
+      }, 1000);
     } catch (e) {
-      console.log("error", e);
+      setMsg(e.response.data.message);
     }
   };
   return (
     <div>
-      <Form noValidate validated={validated} onSubmit={handleSubmit}>
-        <Form.Group className="mb-3" controlId="formGroupName">
-          <Form.Label>Name</Form.Label>
-          <Form.Control
-            type="test"
-            placeholder="Enter email"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-          />
-          <Form.Control.Feedback type="invalid">{msg}</Form.Control.Feedback>
-        </Form.Group>
-        <Form.Group className="mb-3" controlId="formGroupEmail">
-          <Form.Label>Email address</Form.Label>
-          <Form.Control
-            type="email"
-            placeholder="Enter email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <Form.Control.Feedback>{msg}</Form.Control.Feedback>
-        </Form.Group>
-        <Form.Group className="mb-3" controlId="formGroupPassword">
-          <Form.Label>Password</Form.Label>
-          <Form.Control
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          <Form.Control.Feedback>{msg}</Form.Control.Feedback>
-        </Form.Group>
-        <Button variant="primary" type="submit">
-          Submit
-        </Button>
-      </Form>
+      <Container>
+        <Form
+          noValidate
+          validated={validated}
+          onSubmit={handleSubmit}
+          className="form-design">
+          <Form.Group className="mb-3" controlId="formGroupName">
+            {msg && <Alert variant="danger">{msg}</Alert>}{" "}
+            <Form.Label>Name</Form.Label>
+            <Form.Control
+              type="test"
+              placeholder="Enter email"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+          </Form.Group>
+          <Form.Group className="mb-3" controlId="formGroupEmail">
+            <Form.Label>Email address</Form.Label>
+            <Form.Control
+              type="email"
+              placeholder="Enter email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </Form.Group>
+          <Form.Group className="mb-3" controlId="formGroupPassword">
+            <Form.Label>Password</Form.Label>
+            <Form.Control
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </Form.Group>
+          <Button variant="primary" type="submit">
+            Register
+          </Button>
+        </Form>
+      </Container>
     </div>
   );
 };

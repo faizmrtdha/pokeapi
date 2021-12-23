@@ -42,8 +42,8 @@ const Login = () => {
           onSubmit={handleSubmit}
           validated={validated}
           className="form-design">
+          {msg && <Alert variant="danger">{msg}</Alert>}{" "}
           <Form.Group className="mb-3" controlId="formGroupEmail">
-            {msg && <Alert variant="danger">{msg}</Alert>}{" "}
             <Form.Label>Email address</Form.Label>
             <Form.Control
               type="email"
@@ -62,7 +62,7 @@ const Login = () => {
             />
           </Form.Group>
           <Button variant="primary" type="submit">
-            Submit
+            Login
           </Button>
         </Form>
       </Container>
