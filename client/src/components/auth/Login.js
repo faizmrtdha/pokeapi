@@ -1,20 +1,21 @@
 import React, { useState } from "react";
 import { Alert, Button, Container, Form } from "react-bootstrap";
 import { API } from "../../hooks/Api";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [validated, setValidated] = useState(false);
   const [msg, setMsg] = useState("");
+  const [alert, setAlert] = useState("");
 
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const form = e.currentTarget;
-    console.log(form);
+    // console.log(form);
     try {
       const users = { email, password };
       const config = { headers: { "Content-Type": "application/json" } };
@@ -28,10 +29,10 @@ const Login = () => {
           navigate("/listpoke");
         }, 1500);
       } else {
-        setMsg(response.data.message);
+        setAlert(response.data.message);
       }
     } catch (e) {
-      setMsg(e.response.data.message);
+      setAlert(e.response.data.message);
     }
   };
 
@@ -42,7 +43,8 @@ const Login = () => {
           onSubmit={handleSubmit}
           validated={validated}
           className="form-design">
-          {msg && <Alert variant="danger">{msg}</Alert>}{" "}
+          {msg && <Alert variant="success">{msg}</Alert>}{" "}
+          {alert && <Alert variant="danger">{alert}</Alert>}{" "}
           <Form.Group className="mb-3" controlId="formGroupEmail">
             <Form.Label>Email address</Form.Label>
             <Form.Control
@@ -61,6 +63,9 @@ const Login = () => {
               onChange={(e) => setPassword(e.target.value)}
             />
           </Form.Group>
+          <Form.Text>
+            Dont have an account? <Link to="/register">Register now!</Link>
+          </Form.Text>
           <Button variant="primary" type="submit">
             Login
           </Button>

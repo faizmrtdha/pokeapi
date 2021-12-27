@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Alert, Button, Container, Form } from "react-bootstrap";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { API } from "../../hooks/Api";
 
 const Register = () => {
@@ -26,7 +26,7 @@ const Register = () => {
         setMsg(response.data.message);
       }
       setTimeout(() => {
-        navigate("/login");
+        navigate("/");
       }, 1000);
     } catch (e) {
       setMsg(e.response.data.message);
@@ -41,7 +41,7 @@ const Register = () => {
           onSubmit={handleSubmit}
           className="form-design">
           <Form.Group className="mb-3" controlId="formGroupName">
-            {msg && <Alert variant="danger">{msg}</Alert>}{" "}
+            {msg && <Alert variant="success">{msg}</Alert>}{" "}
             <Form.Label>Name</Form.Label>
             <Form.Control
               type="test"
@@ -68,6 +68,9 @@ const Register = () => {
               onChange={(e) => setPassword(e.target.value)}
             />
           </Form.Group>
+          <Form.Text>
+            Have an account? <Link to="/">Click here to login</Link>
+          </Form.Text>
           <Button variant="primary" type="submit">
             Register
           </Button>
