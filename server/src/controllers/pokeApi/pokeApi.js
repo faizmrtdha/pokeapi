@@ -26,15 +26,21 @@ exports.getDetailPoke = async (req, res) => {
     });
 
     const getData = response.data;
-    console.log("getdata", getData);
+    // console.log("getdata", getData.name);
 
-    // ADD TO MODEL
-    // const createPoke = await poke.create({
-    //   name: getData.species.name,
-    //   image: getData.sprites.other.dream_world.front_default,
-    //   height: getData.height,
-    //   weight: getData.weight
-    // });
+    const findPoke = await poke.findOne({ where: { name: getData.name } });
+    if (!findPoke) {
+      // ADD TO MODEL
+      const createPoke = await poke.create({
+        id: getData.id,
+        name: getData.name,
+        image: getData.sprites.front_default,
+        height: getData.height,
+        weight: getData.weight,
+      });
+    }
+    console.log(getData.name);
+
     res.status(200).send({
       status: "success",
       message: "data telah diterima",
@@ -51,15 +57,40 @@ exports.getDetailPoke = async (req, res) => {
 exports.addPoke = async (req, res) => {
   try {
     const { type, name } = req.body;
+    // const { userId, pokeId } = req.body;
 
-    const createPoke = await poke.create({
-      ...req.body,
+    // const createPoke = await poke.create({
+    //   ...req.body,
+    // });
+    console.log("req body", req.body);
+
+    const find = await user_poke.findOne({
+      where: { pokeId: req.body.pokeId, userId: req.body.userId },
     });
 
+    if (find) {
+      return res.status(404).send({
+        status: "failed",
+        message: "Sorry you have catch this pokemon",
+      });
+    }
+    const createPoke = await user_poke.create({
+      userId: req.body.userId,
+      pokeId: req.body.pokeId,
+      name: req.body.name,
+    });
+
+    // console.log("nickname", findPoke);
+
+    // const createJurn = await user_poke.create({
+    //   userId: userId,
+    //   pokeId: pokeId,
+    // });
+
+    // console.log("create", createPoke);
     res.send({
       status: "success",
-      message: "Pokemon berhasil di tambahkan",
-      data: createPoke,
+      message: "Pokemon has been added to your list pokemon",
     });
   } catch (error) {
     res.status(404).send({
@@ -71,60 +102,52 @@ exports.addPoke = async (req, res) => {
 
 exports.catchPokemon = async (req, res) => {
   const { user_id, poke_id, name } = req.body;
+  // console.log(req.body);
   try {
-    // to gerate a randome rounded number between 1 to 10;
-    const probability = Math.random() < 0.5 ? 0 : 1;
+    // to gerate a randome rounded number between 0 to 1;
+    const probability = Math.random();
 
-    // function isEven(probability) {
-    //   if (probability % 2 == 0) {
-    //     return "genap";
-    //   } else {
-    //     return "ganjil";
-    //   }
-    // }
+    console.log("probability", probability);
 
-    console.log("iseven", isEven(probability));
+    function isCatch(probability) {
+      if (probability > 0.5) {
+        return "berhasil";
+      } else {
+        return "gagal";
+      }
+    }
 
-    if (probability === 0) {
-      return res.status(404).send({
+    // console.log("isCatch", isCatch());
+
+    if (isCatch(probability) === "gagal") {
+      res.status(404).send({
         status: "failed",
-        message: `You Failed Catch Pokemon because your random number is ${probability} it's odd number`,
+        message: "Sorry you failed catch poke",
+      });
+    } else {
+      res.status(200).send({
+        status: "success",
+        message: "Congratulation you have catched pokemon",
       });
     }
-    const findUser = await user.findOne({
-      where: { id: user_id },
-    });
 
-    const findPoke = await poke.findAll({
-      where: { id: poke_id },
-    });
+    // const findPoke = await user_poke.findOne({
+    //   where: { pokeId: poke_id, userId: user_id },
+    // });
 
-    const catchUserPoke = await user_poke.create({
-      userId: user_id,
-      pokeId: poke_id,
-      name: name,
-    });
+    // if (!findPoke) {
+    //   const createPoke = await user_poke.create({
+    //     pokeId: poke_id,
+    //     userId: user_id,
+    //     name: name,
+    //   });
+    // }
 
-    const getUser = await user.findAll({
-      where: { id: user_id },
-      include: {
-        model: poke,
-        as: "pokes",
-      },
-
-      attributes: {
-        exclude: ["createdAt", "updatedAt"],
-      },
-    });
-
-    res.status(200).send({
-      status: "success",
-      message: `Congratulations You Have Catched Pokemon, Your Number is ${theRandomNumber} its even number`,
-      data: getUser,
-    });
+    // console.log(isCatch(probability));
+    // console.log("probability", probability);
   } catch (error) {
     console.log(error);
-    res.status(500).send({
+    res.status(400).send({
       status: "error",
       message: error.message,
     });
@@ -133,6 +156,7 @@ exports.catchPokemon = async (req, res) => {
 
 exports.releasePokemon = async (req, res) => {
   const { user_id, poke_id } = req.body;
+  // console.log(req.body);
   try {
     // to gerate a randome rounded number between 1 to 10;
     const theRandomNumber = Math.floor(Math.random() * 100) + 1;
@@ -144,7 +168,8 @@ exports.releasePokemon = async (req, res) => {
         theRandomNumber == 3 ||
         theRandomNumber == 5 ||
         theRandomNumber == 7 ||
-        (theRandomNumber % 2 != 0 &&
+        (theRandomNumber % theRandomNumber != 0 &&
+          theRandomNumber % 2 != 0 &&
           theRandomNumber % 3 != 0 &&
           theRandomNumber % 5 != 0 &&
           theRandomNumber % 7 != 0)
@@ -157,7 +182,7 @@ exports.releasePokemon = async (req, res) => {
     console.log("isPrime", isPrime(theRandomNumber));
     if (isPrime(theRandomNumber) === "notPrime") {
       return res.status(404).send({
-        status: "Vice Versa",
+        status: `Vice Versa - Random number is ${theRandomNumber}`,
         message: `You Have Failed to Release Pokemon because your random number is ${theRandomNumber}, its not prime`,
       });
     }
@@ -201,21 +226,22 @@ exports.releasePokemon = async (req, res) => {
 
 exports.getUserCatchedPoke = async (req, res) => {
   const { user_id } = req.body;
+  console.log("user_id", req.body);
   try {
-    let i;
-    let fib = []; // Initialize array!
+    // let i;
+    // let fib = []; // Initialize array!
 
-    fib[0] = 0;
-    fib[1] = 1;
-    for (i = 2; i <= 10; i++) {
-      // Next fibonacci number = previous + one before previous
+    // fib[0] = 0;
+    // fib[1] = 1;
+    // for (i = 2; i <= 10; i++) {
+    //   // Next fibonacci number = previous + one before previous
 
-      // Translated to JavaScript:
-      fib[i] = fib[i - 1] + fib[i - 2];
-    }
-    console.log(fib[3]);
+    //   // Translated to JavaScript:
+    //   fib[i] = fib[i - 1] + fib[i - 2];
+    // }
+    // // console.log(fib[3]);
 
-    const getUser = await user.findAll({
+    const getUser = await user.findOne({
       include: [
         {
           model: poke,
@@ -232,10 +258,12 @@ exports.getUserCatchedPoke = async (req, res) => {
       where: { id: user_id },
     });
 
+    // console.log(getUser);
+
     res.status(200).send({
       status: "success",
       message: "Here's Your Pokemon List",
-      data: getUser,
+      data: getUser.pokes,
     });
   } catch (error) {
     console.log(error);
@@ -252,6 +280,8 @@ exports.renamePoke = async (req, res) => {
   const { user_id, poke_id } = req.params;
   const { name } = req.body;
 
+  console.log("params", req.params);
+  console.log("body", req.body);
   try {
     const fibonacci = (n) =>
       Array.from({ length: n }).reduce(
@@ -264,16 +294,17 @@ exports.renamePoke = async (req, res) => {
       const indexLocation = tempPika.length - 1;
 
       tempPika.push(
-        name + listFibo[indexLocation >= 0 ? indexLocation + 1 : 0]
+        name + "-" + listFibo[indexLocation >= 0 ? indexLocation + 1 : 0]
       );
     };
 
     generatePika();
-    console.log("nnama", tempPika);
-    const update = await poke.update(
-      { name: tempPika[-1] },
+    console.log("full", tempPika);
+    console.log("nnama", tempPika[tempPika.length - 1]);
+    const update = await user_poke.update(
+      { name: tempPika[tempPika.length - 1] },
       {
-        where: { id: poke_id },
+        where: { pokeId: poke_id, userId: user_id },
       }
     );
     // let i;
