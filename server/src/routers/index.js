@@ -12,14 +12,14 @@ const {
 
 const router = Router();
 
-router.post("/register", register);
-router.post("/login", login);
+router.post("/api/register", register);
+router.post("/api/login", login);
 
 router.get("/api/listpoke", getListPoke);
-router.get("/api/detailpoke/:id/", getDetailPoke);
-router.get("/api/userPokes", getUserCatchedPoke);
+router.get("/api/getdetail/:id/", getDetailPoke);
+router.post("/api/userpokes/", getUserCatchedPoke);
 router.post("/api/addpoke", addPoke);
-router.post("/api/catchpoke", catchPokemon);
+router.get("/api/catchpoke", catchPokemon);
 router.post("/api/releasepoke", releasePokemon);
 router.post("/api/renamepoke/:user_id/:poke_id", renamePoke);
 
